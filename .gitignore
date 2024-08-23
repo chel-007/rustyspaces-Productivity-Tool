@@ -1,0 +1,5 @@
+/target
+/flutterfront/
+/node_modules/
+/**/Cargo.lock
+/.env

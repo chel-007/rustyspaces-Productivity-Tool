@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="./output.css" rel="stylesheet">
+    <title>Rustyspaces</title>
+    <!-- Include Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .bg-layer-1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #2d3748a4;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .bg-layer-2 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #2d3748c2;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+        }
+
+        .bg-layer-2:hover {
+            background-color: #4A5568;
+            cursor: pointer;
+        }
+
+        .tooltip {
+            position: relative;
+            background-color: #2d3748a8; /* Tailwind's bg-gray-800 */
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.25rem;
+            white-space: nowrap;
+            z-index: 10;
+            font-size: 0.575rem; /* Tailwind's text-sm */
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #4A5568; /* Light border stroke */
+        }
+
+        .tooltip i {
+            margin-right: 0.5rem; /* Space between icon and text */
+        }
+
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: -16px; /* Adjust to place the arrow correctly */
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px;
+            border-style: solid;
+            border-color: #2d3748 transparent transparent transparent; /* Arrow color */
+        }
+
+        .relative-center {
+            position: relative;
+            display: flex;
+            gap: 2rem;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .space-item {
+            background-color: #4a5568ac;
+            padding: 1rem;
+            border-radius: 5rem;
+            width: 260px;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .space-item:hover {
+            background-color: #2d3748df;
+            transform: scale(1.05);
+        }
+
+        .space-list{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup {
+            position: absolute;
+            top: 10%;
+            left: 90%;
+            transform: translate(-50%, -50%);
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: #333333b8;
+            color: #fff;
+            display: none;
+            z-index: 1000;
+        }
+        .popup.show {
+            display: block;
+        }
+        .popup .close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-300 text-white p-4 flex items-center justify-center h-screen" style="background-image: url('your-background-image.jpg'); background-size: cover; background-position: center;">
+    <div class="absolute inset-0 bg-black opacity-90"></div>
+    <div style="border: solid 1px red; gap: 4rem;" class="container border-dark p-4 relative z-10 h-full flex items-center justify-center">
+        {% if not has_spaces %}
+    <!-- Display when there are no spaces -->
+    <div class="relative-center">
+        <div class="tooltip">
+            <i class="fas fa-info-circle"></i> Create your first space!
+        </div>
+        <div class="bg-layer-1 pulse">
+            <div class="bg-gray-700 bg-layer-2 pulse">
+                <button class="text-white font-bold py-4 px-6 rounded-full" onclick="createSpace()">
+                    <i class="fas fa-plus text-6xl"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <!-- Display when there are spaces -->
+    <div style="border: solid 1px red; gap: 4rem;" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full">
+        <!-- Space list -->
+            <div style="border: solid 1px red;" class="space-list pb-4 flex gap-4">
+                {% for space in spaces %}
+                    <div class="w-full space-item bg-gray-800 p-4 rounded" onclick="goToSpace('{{ space }}')">
+                        {{ space }}
+                    </div>
+                {% endfor %}
+            </div>
+            
+    
+        
+        <!-- Tooltip and Create Button -->
+        <div style="border: solid 1px red; justify-items: center; align-items:center" class="relative-center">
+            <div style="width: 200px;" class="tooltip mb-4">
+                <i class="fas fa-info-circle"></i> Create another space!
+            </div>
+            <div class="bg-layer-1 pulse">
+                <div class="bg-gray-700 bg-layer-2 pulse">
+                    <button class="text-white font-bold py-4 px-6 rounded-full" onclick="createSpace()">
+                        <i class="fas fa-plus text-6xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+{% endif %}
+
+    <div id="authPopup" class="popup">
+        <span id="authMessage">Authenticating...</span>
+        <span class="close" onclick="closePopup()">×</span>
+    </div>
+
+    </div>
+
+    <script>
+        function showPopup(message) {
+            const popup = document.getElementById('authPopup');
+            const messageElement = document.getElementById('authMessage');
+            messageElement.textContent = message;
+            popup.classList.add('show');
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('authPopup');
+            popup.classList.remove('show');
+        }
+
+        async function authenticate() {
+            showPopup('Authenticating...');
+            try {
+                const response = await fetch('/auth/silent', {
+                    method: 'POST',
+                });
+                const data = await response.json();
+                console.log('Authenticated with user ID:', data);
+                showPopup('authentication successful');
+                // Handle post-authentication actions
+            } catch (error) {
+                console.error('Authentication failed:', error);
+                closePopup();
+                // Handle authentication failure
+            }
+        }
+
+        // Call authenticate function on page load or based on specific action
+        window.onload = authenticate;
+    </script>
+
+    <!-- Include your JavaScript here -->
+    <script src="./script.js"></script>
+    <script>
+        function goToSpace(space) {
+            window.location.href = `/spaces/${space}`;
+        }
+    </script>
+</body>
+</html>

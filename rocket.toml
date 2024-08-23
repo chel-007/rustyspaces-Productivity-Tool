@@ -1,0 +1,17 @@
+[global]
+address = "127.0.0.1"
+port = 8080
+
+[development]
+address = "127.0.0.1"
+port = 8080
+
+
+[global.databases]
+postgres_database = { url = "postgresql://postgres.qxofqzgzwcfxyssbzvog:BnykNFy6M6dgq35#@aws-0-eu-central-1.pooler.supabase.com:6543/postgres", pool_size = 5 }
+timeout = 300
+
+[default]
+log = "debug"
+
+
