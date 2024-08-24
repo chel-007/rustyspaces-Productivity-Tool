@@ -11,7 +11,7 @@ COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 COPY static ./static
 COPY templates ./templates
-COPY rocket.toml ./rocket.toml
+COPY Rocket.toml ./Rocket.toml
 COPY diesel.toml ./diesel.toml
 
 # Build the application
@@ -36,7 +36,7 @@ COPY --from=builder /app/target/x86_64-unknown-linux-gnu/release/rustyspaces /ap
 # Copy static files and other configuration files
 COPY --from=builder /app/static /app/static
 COPY --from=builder /app/templates /app/templates
-COPY --from=builder /app/rocket.toml /app/rocket.toml
+COPY --from=builder /app/Rocket.toml /app/Rocket.toml
 
 # Set executable permissions
 RUN chmod +x /app/bin/rustyspaces
