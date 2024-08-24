@@ -1670,6 +1670,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "955d28af4278de8121b7ebeb796b6a45735dc01436d898801014aced2773a3d6"
 
 [[package]]
+name = "rustyspaces"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "diesel",
+ "dotenv",
+ "jsonwebtoken",
+ "rocket",
+ "rocket_dyn_templates",
+ "rocket_sync_db_pools",
+ "serde",
+ "serde_json",
+ "tera",
+ "uuid",
+]
+
+[[package]]
 name = "ryu"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1832,23 +1849,6 @@ checksum = "ce305eb0b4296696835b71df73eb912e0f1ffd2556a501fcede6e0c50349191c"
 dependencies = [
  "libc",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "spaces"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "diesel",
- "dotenv",
- "jsonwebtoken",
- "rocket",
- "rocket_dyn_templates",
- "rocket_sync_db_pools",
- "serde",
- "serde_json",
- "tera",
- "uuid",
 ]
 
 [[package]]
