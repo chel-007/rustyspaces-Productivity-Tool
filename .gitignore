@@ -1,7 +1,6 @@
 /target
 /flutterfront/
 /node_modules/
-/**/Cargo.lock
 /.env
 *.dill
 *.track.dill
