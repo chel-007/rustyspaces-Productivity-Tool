@@ -10,7 +10,8 @@ COPY Cargo.toml Cargo.lock ./
 # Copy the source code and other necessary files
 COPY src ./src
 COPY static ./static
-COPY rocket.toml ./rocket.toml 
+COPY templates ./templates
+COPY rocket.toml ./rocket.toml
 COPY diesel.toml ./diesel.toml
 
 # Build the application
@@ -24,16 +25,24 @@ RUN apt-get update && \
     apt-get install -y libpq-dev
 
 # Set the working directory in the final image
-WORKDIR /app/bin
+WORKDIR /app
+
+RUN ls -la /app
+RUN ls -la /app/bin
+RUN ls -la /app/static
+RUN ls -la /app/templates
+
 
 # Copy the compiled binary from the builder stage
-COPY --from=builder /app/target/x86_64-unknown-linux-gnu/release/rustyspaces .
+COPY --from=builder /app/target/x86_64-unknown-linux-gnu/release/rustyspaces /app/bin/rustyspaces
 
 # Copy static files if needed
-COPY --from=builder /app/static ./static
+COPY --from=builder /app/static /app/static
+COPY --from=builder /app/templates /app/templates
+COPY --from=builder /app/rocket.toml /app/rocket.toml
 
 # Set executable permissions
-RUN chmod +x rustyspaces
+RUN chmod +x /app/bin/rustyspaces
 
 # Command to run the application
-CMD ["./rustyspaces"]
+CMD ["/app/bin/rustyspaces"]
