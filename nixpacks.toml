@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["binutils", "gcc", "postgresql"]
+nixPkgs = ["binutils", "gcc", "postgresql", "rust-bin.stable.latest.default"]
 
 [build]
 command = "mkdir -p bin && cargo build --release && cp target/release/rustyspaces bin"
