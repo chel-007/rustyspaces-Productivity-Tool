@@ -1,12 +1,12 @@
 [phases.setup]
 nixPkgs = ["...", "postgresql"]
 
-[build]
+[phases.build]
 command = """
   cargo build --release &&
   mkdir -p /app/bin &&
   cp target/release/rustyspaces /app/bin/
 """
 
-[start]
+[phases.start]
 command = "/app/bin/rustyspaces"
