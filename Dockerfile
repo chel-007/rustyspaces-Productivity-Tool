@@ -7,13 +7,10 @@ WORKDIR /app
 # Copy Cargo.toml and Cargo.lock to the working directory
 COPY Cargo.toml Cargo.lock ./
 
-# Fetch dependencies
-RUN cargo fetch
-
 # Copy the source code and other necessary files
 COPY src ./src
 COPY static ./static
-COPY rocket.toml ./rocket.toml
+COPY rocket.toml ./rocket.toml 
 COPY diesel.toml ./diesel.toml
 
 # Build the application
