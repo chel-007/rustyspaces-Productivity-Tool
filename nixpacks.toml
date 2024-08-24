@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["binutils", "gcc", "postgresql", "libpq"]
+nixPkgs = ["binutils", "gcc", "postgresql"]
 
 [build]
 command = "cargo build --release && mkdir -p ./bin && cp target/release/rustyspaces ./bin/"
