@@ -47,5 +47,6 @@ RUN ls -la /app/bin
 RUN ls -la /app/static
 RUN ls -la /app/templates
 
+EXPOSE 8080
 # Command to run the application
 CMD ["/app/bin/rustyspaces"]
