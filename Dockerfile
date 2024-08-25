@@ -13,6 +13,7 @@ COPY static ./static
 COPY templates ./templates
 COPY Rocket.toml ./Rocket.toml
 COPY diesel.toml ./diesel.toml
+COPY music ./music
 
 # Build the application
 RUN cargo build --release --target x86_64-unknown-linux-gnu
