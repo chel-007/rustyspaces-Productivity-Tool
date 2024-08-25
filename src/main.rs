@@ -15,17 +15,31 @@ use serde::{Deserialize};
 use crate::models::StickyNote;
 use crate::models::StickyLine;
 use rocket::fs::NamedFile;
-use std::path::{Path};
+use std::path::{Path, PathBuf};
 use rocket::response::status;
 use rocket::http::Status;
+use rocket::response::content;
+use rocket::http::ContentType;
+use rocket::tokio::fs::{self, File};
+use rocket::tokio::io::BufReader;
+use rocket::http::hyper::body::Bytes;
+use rocket::response::stream::ByteStream;
+use tokio_util::io::ReaderStream;
+use rand::seq::SliceRandom; // For selecting a random file
+use tokio_stream::wrappers::ReadDirStream; // To wrap `ReadDir` as a stream
+use tokio_stream::StreamExt; // To use `collect` on the stream
+use futures::Stream;
+use rocket::tokio::sync::RwLock;
+use std::sync::Arc;
+use rocket::State;
 
 mod db;
 mod models;
 mod schema;
-mod state;
 
 #[launch]
 fn rocket() -> _ {
+    std::env::set_var("DISABLE_PREPARED_STATEMENTS", "true");
 
     rocket::build()
         // .attach(cors)
@@ -34,8 +48,11 @@ fn rocket() -> _ {
         .mount("/", routes![index, get_spaces, create_space, view_space, silent_auth, get_other_active_spaces])
         .mount("/notes", routes![create_sticky_note, get_sticky_notes, update_sticky_note, delete_sticky_note])
         .mount("/track", routes![start_time_tracking, get_all_time_tracking, delete_time_tracking, complete_time_tracking])
+        .mount("/music", routes![stream_random_music, next_song, play_test, get_metadata])
         .attach(Template::fairing())
         .manage(Spaces::default())
+        .manage(MusicState::default())
+        .manage(CurrentFileName(Arc::new(RwLock::new(None))))
 }
 
 #[derive(Default)]
@@ -410,3 +427,179 @@ async fn delete_time_tracking(
         Err(_) => Err(Status::InternalServerError),
     }
 }
+
+#[derive(Default)]
+struct MusicState {
+    playlist: Mutex<Vec<String>>, // Store file names or paths
+    current_song: Mutex<Option<String>>, // Current song being played
+}
+
+struct CurrentFileName(Arc<RwLock<Option<String>>>);
+
+#[get("/play")]
+async fn stream_random_music(state: &State<CurrentFileName>) -> Result<(ContentType, ByteStream<impl futures::Stream<Item = Vec<u8>>>), Status> {
+    // List all files in the 'music' directory
+    let music_dir = Path::new("music/");
+    println!("Checking if music directory exists: {:?}", music_dir.display());
+
+    let read_dir = match rocket::tokio::fs::read_dir(music_dir).await {
+        Ok(read_dir) => {
+            println!("Successfully read the music directory.");
+            read_dir
+        },
+        Err(e) => {
+            println!("Error reading music directory: {:?}", e);
+            return Err(Status::InternalServerError);
+        },
+    };
+
+    // Convert ReadDir to a stream and collect entries
+    // Convert ReadDir to a stream and collect entries
+    let entries = ReadDirStream::new(read_dir)
+        .filter_map(|entry| match entry {
+            Ok(entry) => {
+                println!("Found entry: {:?}", entry.path().display());
+                Some(entry)
+            },
+            Err(e) => {
+                println!("Error reading directory entry: {:?}", e);
+                None
+            },
+        })
+        .collect::<Vec<_>>()
+        .await;
+
+    // Filter entries to get file paths
+    let files: Vec<PathBuf> = entries
+        .iter()
+        .filter_map(|entry| {
+            let path = entry.path();
+            let is_file = rocket::tokio::task::block_in_place(|| {
+                let metadata = std::fs::metadata(&path);
+                match metadata {
+                    Ok(metadata) => metadata.is_file(),
+                    Err(e) => {
+                        println!("Error getting metadata for file {}: {:?}", path.display(), e);
+                        false
+                    },
+                }
+            });
+            if is_file {
+                println!("File found: {:?}", path.display());
+                Some(path)
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    if files.is_empty() {
+        println!("No files found in the music directory.");
+        return Err(Status::NotFound);
+    }
+
+    // Randomly select a file
+    let random_file_path = match files.choose(&mut rand::thread_rng()) {
+        Some(path) => path,
+        None => {
+            println!("Failed to select a random file.");
+            return Err(Status::InternalServerError);
+        },
+    };
+
+    println!("Selected file: {:?}", random_file_path.display());
+    
+
+    // Open the selected file
+    let file = match File::open(&random_file_path).await {
+        Ok(f) => f,
+        Err(e) => {
+            println!("Error opening file {}: {:?}", random_file_path.display(), e);
+            return Err(Status::InternalServerError);
+        },
+    };
+
+        // Process the metadata and store the filename
+    let file_name = process_metadata(&random_file_path);
+
+    let mut file_name_lock = state.0.write().await;
+    *file_name_lock = Some(file_name.clone());
+
+    println!("processed file: {:?}", file_name);
+    println!("processed file stored: {:?}", file_name_lock);
+
+    // Create a buffered reader and stream its contents as Vec<u8>
+    let reader = BufReader::new(file);
+    let stream = ReaderStream::new(reader).map(|result| {
+        match result {
+            Ok(bytes) => bytes.to_vec(),
+            Err(e) => {
+                println!("Error reading from file stream: {:?}", e);
+                Vec::new() // Handle the error by yielding an empty Vec<u8>
+            },
+        }
+    });
+
+    // Return the stream as a ByteStream
+    Ok((ContentType::Binary, ByteStream::from(stream)))
+}
+
+// Define the process_metadata function
+fn process_metadata(file_path: &PathBuf) -> String {
+    let file_name_without_extension = file_path
+        .file_stem()
+        .and_then(|os_str| os_str.to_str())
+        .unwrap_or("unknown");
+
+    file_name_without_extension.to_string()
+}
+
+#[get("/metadata")]
+async fn get_metadata(state: &State<CurrentFileName>) -> Result<String, rocket::http::Status> {
+    let file_name_lock = state.0.read().await;
+
+    match &*file_name_lock {
+        Some(name) => Ok(name.clone()),
+        None => Err(rocket::http::Status::NotFound),
+    }
+}
+
+
+#[get("/test")]
+async fn play_test() -> Result<(ContentType, ByteStream<impl futures::Stream<Item = Vec<u8>>>), Status> {
+    let path = Path::new("music/comet.mp3"); // Ensure you have a file named test.mp3
+    let file = match File::open(&path).await {
+        Ok(f) => f,
+        Err(_) => return Err(Status::InternalServerError),
+    };
+
+    let reader = BufReader::new(file);
+    let stream = ReaderStream::new(reader).map(|result| {
+        match result {
+            Ok(bytes) => bytes.to_vec(),
+            Err(e) => {
+                println!("Error reading from file stream: {:?}", e);
+                Vec::new() // Handle the error by yielding an empty Vec<u8>
+            },
+        }
+    });
+
+    Ok((ContentType::new("audio", "mpeg"), ByteStream::from(stream)))
+}
+
+
+#[post("/next")]
+async fn next_song(state: &State<MusicState>) -> Result<Json<String>, Status> {
+    let mut playlist = state.playlist.lock().unwrap();
+    let mut current_song = state.current_song.lock().unwrap();
+
+    if playlist.is_empty() {
+        return Err(Status::NotFound);
+    }
+
+    let next_song = playlist.pop().unwrap();
+    *current_song = Some(next_song.clone());
+
+    Ok(Json(next_song))
+}
+

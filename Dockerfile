@@ -36,6 +36,7 @@ COPY --from=builder /app/target/x86_64-unknown-linux-gnu/release/rustyspaces /ap
 # Copy static files and other configuration files
 COPY --from=builder /app/static /app/static
 COPY --from=builder /app/templates /app/templates
+COPY --from=builder /app/music /app/music
 COPY --from=builder /app/Rocket.toml /app/Rocket.toml
 
 # Set executable permissions
@@ -46,6 +47,7 @@ RUN ls -la /app
 RUN ls -la /app/bin
 RUN ls -la /app/static
 RUN ls -la /app/templates
+RUN ls -la /app/music
 
 EXPOSE 8080
 # Command to run the application
