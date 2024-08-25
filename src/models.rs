@@ -50,6 +50,7 @@ pub struct StickyNote {
     pub id: Uuid,
     pub space_id: i32,
     pub user_id: String,
+    pub title: String,
     pub color: String,
     pub text_color: String,
     pub created_at: chrono::NaiveDateTime,
@@ -68,11 +69,18 @@ pub struct UpdateNote {
     pub lines: Option<Vec<String>>,
 }
 
+#[derive(Insertable, Serialize, Deserialize)]
+#[diesel(table_name = sticky_notes)]
+pub struct UpdateHeader {
+    pub id: Uuid,
+    pub title: String,
+}
+
 
 #[derive(Insertable, Serialize, Deserialize)]
 #[diesel(table_name = sticky_notes)]
 pub struct NewStickyNote {
-    // pub user_id: String,
+    pub title: String,
     pub color: String,
     pub text_color: String,
     pub tags: Option<Vec<String>>,
@@ -92,7 +100,6 @@ pub struct TimeTrackingSession {
     pub start_time: chrono::NaiveDateTime,
     pub end_time: Option<chrono::NaiveDateTime>,
     pub duration: Option<i64>,
-    pub limit_notification_sent: bool,
 }
 
 #[derive(Queryable, Insertable, Serialize, Deserialize)]

@@ -13,12 +13,13 @@ diesel::table! {
         id -> Uuid,
         space_id -> Int4,
         user_id -> Text,
+        title -> Text,
         color -> Text,
         text_color -> Text,
         created_at -> Timestamp,
         updated_at -> Nullable<Timestamp>,
         tags -> Nullable<Array<Text>>,
-        lines -> Nullable<Array<Text>>, 
+        lines -> Nullable<Array<Text>>,
     }
 }
 
@@ -31,11 +32,8 @@ diesel::table! {
         start_time -> Timestamp,
         end_time -> Nullable<Timestamp>,
         duration -> Nullable<Int8>,
-        limit_notification_sent -> Bool,
     }
 }
-
-
 
 diesel::allow_tables_to_appear_in_same_query!(
     spaces,

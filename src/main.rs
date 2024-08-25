@@ -46,7 +46,7 @@ fn rocket() -> _ {
         .attach(db::DbConn::fairing())
         .mount("/", rocket::fs::FileServer::from("static"))
         .mount("/", routes![index, get_spaces, create_space, view_space, silent_auth, get_other_active_spaces])
-        .mount("/notes", routes![create_sticky_note, get_sticky_notes, update_sticky_note, delete_sticky_note])
+        .mount("/notes", routes![create_sticky_note, get_sticky_notes, update_sticky_note, update_header, delete_sticky_note])
         .mount("/track", routes![start_time_tracking, get_all_time_tracking, delete_time_tracking, complete_time_tracking])
         .mount("/music", routes![stream_random_music, next_song, play_test, get_metadata])
         .attach(Template::fairing())
@@ -109,16 +109,25 @@ fn silent_auth(jar: &CookieJar<'_>) -> Json<String> {
 #[get("/spaces")]
 async fn get_spaces(jar: &CookieJar<'_>, conn: db::DbConn) -> Json<HashMap<String, Vec<String>>> {
     let user_id = get_user_id(jar);
-    let user_spaces = db::get_user_spaces(&conn, &user_id).await;
-    
-    let mut result = HashMap::new();
-    println!("getspaces: {}", user_id);
-    println!("getspaceslist: {:?}", user_spaces);
+    let user_spaces_result = db::get_user_spaces(&conn, &user_id).await;
 
-    result.insert(user_id, user_spaces);
-    // println("getresults: {}", Json(result))
+    let mut result = HashMap::new();
+    
+    match user_spaces_result {
+        Ok(user_spaces) => {
+            result.insert(user_id, user_spaces);
+        }
+        Err(e) => {
+            // Handle the error, e.g., logging or setting an error message
+            println!("Error fetching user spaces: {:?}", e);
+            // Optionally, you can insert an empty vector or handle the error differently
+            result.insert(user_id, Vec::new());
+        }
+    }
+
     Json(result)
 }
+
 
 #[post("/spaces", data = "<space_name>")]
 async fn create_space(space_name: Json<String>, jar: &CookieJar<'_>, conn: db::DbConn) -> status::Custom<Json<String>> {
@@ -140,8 +149,17 @@ async fn create_space(space_name: Json<String>, jar: &CookieJar<'_>, conn: db::D
 #[get("/spaces/<space_name>")]
 async fn view_space(space_name: String, jar: &CookieJar<'_>, conn: db::DbConn, spaces: &rocket::State<Spaces>) -> Template {
     let user_id = get_user_id(jar);
-    let user_spaces = db::get_user_spaces(&conn, &user_id).await;
-    
+    let user_spaces_result = db::get_user_spaces(&conn, &user_id).await;
+
+    let user_spaces = match user_spaces_result {
+        Ok(s) => s,
+        Err(e) => {
+            // Handle the error, e.g., logging or defaulting to an empty vector
+            println!("Error fetching user spaces: {:?}", e);
+            Vec::new()
+        }
+    };
+
     if user_spaces.contains(&space_name) {
         spaces.add_connection(user_id.clone(), space_name.clone());
 
@@ -154,6 +172,7 @@ async fn view_space(space_name: String, jar: &CookieJar<'_>, conn: db::DbConn, s
         Template::render("404", &json!({ "error": "Space not found" }))
     }
 }
+
 
 
 #[get("/others")]
@@ -201,6 +220,7 @@ async fn create_sticky_note(
     let new_note = db::create_sticky_note(
         &conn,
         &user_id,
+        &note_data.title,
         space_id,
         &note_data.color,
         &note_data.text_color,
@@ -244,6 +264,39 @@ async fn get_sticky_notes(
 
     Json(notes)
 }
+
+#[post("/header?<space_name>", data = "<note>")]
+async fn update_header(
+    jar: &CookieJar<'_>,
+    conn: db::DbConn,
+    note: Json<models::UpdateHeader>,
+    space_name: Option<String>,
+) -> Result<Json<StickyNote>, status::Custom<Json<String>>> {
+    let user_id = get_user_id(jar);
+
+    let space_name = match space_name {
+        Some(name) => name,
+        None => return Err(status::Custom(Status::BadRequest, Json("Space name is missing".to_string()))),
+    };
+
+    let space_id = match db::get_space_id(&conn, user_id.clone(), space_name).await {
+        Ok(id) => id,
+        Err(_) => return Err(status::Custom(Status::NotFound, Json("Space not found".to_string()))),
+    };
+
+    match db::update_sticky_header(
+        &conn,
+        user_id,
+        space_id,
+        note.id,
+        note.title.clone(),
+    ).await {
+        Ok(updated_note) => Ok(Json(updated_note)),
+        Err(e) => Err(status::Custom(Status::InternalServerError, Json(format!("Error updating sticky note header: {:?}", e)))),
+    }
+}
+
+
 
 #[put("/update?<space_name>", data = "<note>")]
 async fn update_sticky_note(

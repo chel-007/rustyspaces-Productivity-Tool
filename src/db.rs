@@ -12,7 +12,7 @@ use crate::models::{StickyNote, TimeTrackingSession};
 #[database("postgres_database")]
 pub struct DbConn(diesel::PgConnection);
 
-pub async fn get_user_spaces(conn: &DbConn, user_id_param: &str) -> Vec<String> {
+pub async fn get_user_spaces(conn: &DbConn, user_id_param: &str) -> Result<Vec<String>, diesel::result::Error> {
     use crate::schema::spaces::dsl::*;
 
     let user_id_param = user_id_param.to_string(); // Clone the string for the async block
@@ -21,9 +21,12 @@ pub async fn get_user_spaces(conn: &DbConn, user_id_param: &str) -> Vec<String> 
         let results = spaces
             .filter(user_id.eq(user_id_param))
             .load::<crate::models::Space>(c)
-            .expect("Error loading spaces");
+            .map_err(|e| {
+                // Log or handle the error as needed
+                e
+            })?;
 
-        results.into_iter().map(|s| s.space_name).collect()
+        Ok(results.into_iter().map(|s| s.space_name).collect())
     })
     .await
 }
@@ -89,6 +92,7 @@ fn format_lines_for_storage(lines: Option<Vec<StickyLine>>) -> Option<Vec<String
 pub async fn create_sticky_note(
     conn: &DbConn,
     user_id: &str,
+    titile: &str,
     space_id: i32,
     color: &str,
     text_color: &str,
@@ -100,6 +104,7 @@ pub async fn create_sticky_note(
     let new_note = StickyNote {
         id: Uuid::new_v4(),
         user_id: user_id.to_string(),
+        title: titile.to_string(),
         space_id: space_id,
         color: color.to_string(),
         text_color: text_color.to_string(),
@@ -159,6 +164,25 @@ pub async fn get_sticky_notes(
     .await
 }
 
+pub async fn update_sticky_header(
+    conn: &DbConn,
+    user_id: String,
+    space_id: i32,
+    note_id: Uuid,
+    new_title: String,
+) -> Result<StickyNote, diesel::result::Error> {
+    use crate::schema::sticky_notes::dsl::*;
+    
+    conn.run(move |c| {
+        diesel::update(sticky_notes.find(note_id))
+            .set((
+                title.eq(new_title), // Update only the title
+                updated_at.eq(Some(chrono::Utc::now().naive_utc())), // Update the timestamp
+            ))
+            .get_result(c)
+    })
+    .await
+}
 
 
 pub async fn update_sticky_note(
@@ -228,7 +252,6 @@ pub async fn create_time_tracking_session(
         start_time,
         end_time: None,
         duration: None,
-        limit_notification_sent: false,
     };
 
     conn.run(move |c| {
