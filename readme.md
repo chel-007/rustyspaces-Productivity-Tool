@@ -45,7 +45,7 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
 
 ![how-to space](images/gifs/create_space.gif)
 
-[![how to create space]()](https://vimeo.com/1002868013?share=copy)
+[![how to create space](images/1-hw.png)](https://vimeo.com/1002868013?share=copy)
 
 
 - **create a stickynote**
