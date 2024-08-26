@@ -41,18 +41,16 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
 
 ### **How to Use**
 
-- **create a space**
-
-![how-to space](images/gifs/create_space.gif)
+- **create a space - video**
 
 [![how to create space](images/1-hw.png)](https://vimeo.com/1002868013?share=copy)
 
 
-- **create a stickynote**
+- **create a stickynote - video**
 
-![how-to stickynote](images/gifs/create_sticky.gif)
+[![how to create space](images/2-hw.png)](https://vimeo.com/1002871815?share=copy)
 
-- **create timetracking**
+- **create timetracking - video**
 
 ![how-to timetrack](images/gifs/time-track.gif)
 
