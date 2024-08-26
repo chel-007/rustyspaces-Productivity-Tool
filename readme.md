@@ -1,57 +1,48 @@
-Project Documentation: Overview and Features
-High-Level Overview of the App
-App Name: RustySpaces
-RustySpaces is a web application that allows users to create, manage, and interact with personal and shared digital spaces. The app includes features such as creating spaces, storing space data in a database, and providing a responsive and visually appealing frontend.
+Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals and building consistent habits. Powered by **Rust**, a PostgreSQL database, and a Flutter frontend, RustySpaces delivers high performance with the following integrated features:
 
 
-#5432 
+**Spaces**: A rusty jampacked space you can create, authenticated by cookies. You can have multiple spaces on the server, each tailored to your needs.
 
-Features Installed and Implemented
-1. Frontend
-index.html.tera
+**Sticky Notes**: Within your space, you can create unlimited sticky notes to document weekly goals. Each note includes a checkbox feature, a header, and more. Notes are stored on **Supabase PostgreSQL** database after being serialized and deserialized using Rust.
+![sticky notes](images/sticky-notes.png)
 
-Purpose: Displays the main page of the app with options to create a new space or view existing spaces.
-Key Components:
-Tooltip: Displays a message prompting users to create their first space.
-Plus Button: Allows users to add new spaces.
-Space List: Shows existing spaces if any are available.
-Styling: Utilizes Tailwind CSS for styling and Font Awesome for icons.
-script.js
 
-Purpose: Handles frontend interactions, such as displaying existing spaces, updating the UI, and managing space creation.
-Key Features:
-Event Listeners: Attached to buttons for creating new spaces.
-Local Storage: Manages space data temporarily on the client side.
-2. Backend
-models.rs
+**TimeTracking**: highly productive feature designed not as a simple stopwatch, but as a tool to track the time spent on activities. It helps you identify areas where you might need to cut down or improve.
 
-Purpose: Defines the data models for the app.
-Key Components:
-Space Model: Represents a space with fields for id, user_id, and space_name.
-NewSpace Struct: Used for creating new space entries in the database.
-db.rs
+![time tracking](images/time-track.png)
 
-Purpose: Handles database interactions.
-Key Components:
-Database Connection: Configured to use SQLite (with a focus on switching to PostgreSQL).
-CRUD Operations:
-get_user_spaces: Fetches spaces for a given user.
-create_space: Inserts a new space into the database.
-Database Setup:
+**Streaming Music**: Even though our music library is small (just 15 tracks), it's still one of the best! You can constantly stream **NCS, Lofi, and Animation** music from the Rust/Rocket server while jotting down notes, time tracking, or working across tabs in your PC.
 
-Migration Files:
-Create Spaces Table:
-SQL: CREATE TABLE spaces (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, space_name TEXT NOT NULL);
-Purpose: Defines the schema for storing space data.
-3. Database Management
-Managed Database Solution:
+![music streaming](images/music-streaming.png)
 
-Current Solution: SQLite for local development and testing.
-Planned Solution: PostgreSQL using Supabase for production.
-Configuration:
+<hr>
 
-Database URL: Set in the environment variables or configuration file.
-Migration Commands:
-diesel migration generate create_spaces - Generates a new migration.
-diesel migration run - Applies migrations to the database.
-Note: Ensure that the PostgreSQL feature is enabled in Diesel for compatibility with the managed database solution.
+**Technical Details:**
+
+-   the frontend, built with Flutter, integrates seamlessly with Rust and is copied to the `/static` folder after each build using a custom script. check it out here
+-   Supabase Postgres is integrated without the need for a `.env` file when running locally - it uses the Database URL specified in `Rocket.toml` for connections.
+
+> NB: `.env` was required while i built the table migrations but isn't required for interacting with data
+
+-   rust's **Rocket, Diesel, and Tokio libraries** are utilized to create the backend web server, manage the database connections, and handle asynchronous streaming.
+-   the music is streamed in **byte chunks**, and on the frontend, HTML Blob is used for processing since the Flutter audioplayers package couldn't handle this for the web.
+-   the sticky notes structure was initially complex due to the need for **custom serialization of individual lines**. but i found a workaround and all lines are stored as an array and split on the frontend using a delimiter (`|`).
+-   deployment is handled using a **Dockerfile** on the Railway service. It copies selected files, runs build commands like a local environment, and grants permission to execute the compiled binary.
+
+<hr>
+
+
+**How to Run Locally:** running the app locally can significantly improve the performance of streaming.
+
+1.  clone the repo using the following command:
+    `git clone [repo-url]` 
+    
+2.  update the dependencies with:
+    `cargo update` 
+    
+3.  start the application by running:
+    `cargo run` 
+    
+    That's all!
+
+> **NB:** the app was designed with the goal of being fully responsive on mobile devices, and thanks to Flutter, it almost is. **However,** please be aware that your cookies won't transfer! xD
