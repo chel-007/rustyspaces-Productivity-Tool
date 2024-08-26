@@ -43,24 +43,21 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
 
 - **create a space**
 
-![how-to space](images/videos/create_space.gif)
+![how-to space](images/gifs/create_space.gif)
 
 - **create a stickynote**
 
-![how-to stickynote](images/videos/sticky-note)
+![how-to stickynote](images/gifs/create_sticky.gif)
 
 - **create timetracking**
 
-![how-to timetrack](images/videos/time-track)
+![how-to timetrack](images/gifs/time-track.gif)
 
 
 **How to Run Locally:** running the app locally can significantly improve the performance of streaming.
 
 1.  clone the repo using the following command:
-    `git clone [repo-url]` 
-    
-2.  update the dependencies with:
-    `cargo update` 
+    `git clone https://github.com/chel-007/rustyspaces-Productivity-Tool.git` 
     
 3.  start the application by running:
     `cargo run` 
@@ -72,4 +69,4 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
     
     That's all!
 
-> **NB:** the app was designed with the goal of being fully responsive on mobile devices, and thanks to Flutter, it almost is. **However,** please be aware that your cookies won't transfer! xD
+> **NB:** the app was designed with the goal of being fully responsive on mobile devices, and thanks to Flutter, it almost is. **However,** please be aware that your cookies won't transfer. xD
