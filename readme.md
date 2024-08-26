@@ -48,11 +48,11 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
 
 - **create a stickynote - video**
 
-[![how to create space](images/2-hw.png)](https://vimeo.com/1002871815?share=copy)
+[![how to create sticky notes](images/2-hw.png)](https://vimeo.com/1002871815?share=copy)
 
 - **create timetracking - video**
 
-![how-to timetrack](images/gifs/time-track.gif)
+[![how to time track activity](images/3-hw.png)](https://vimeo.com/1002873602?share=copy)
 
 
 **How to Run Locally:** running the app locally can significantly improve the performance of streaming.
