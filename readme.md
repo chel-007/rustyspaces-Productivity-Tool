@@ -43,7 +43,7 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
 
 - **create a space**
 
-![how-to space](images/videos/space.mp4)
+![how-to space](images/videos/create_space.gif)
 
 - **create a stickynote**
 
