@@ -39,6 +39,20 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
 
 <hr>
 
+### **How to Use**
+
+- **create a space**
+
+![how-to space](images/videos/space.mp4)
+
+- **create a stickynote**
+
+![how-to stickynote](images/videos/sticky-note.mp4)
+
+- **create timetracking**
+
+![how-to timetrack](images/videos/time-track.mp4)
+
 
 **How to Run Locally:** running the app locally can significantly improve the performance of streaming.
 
@@ -50,6 +64,11 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
     
 3.  start the application by running:
     `cargo run` 
+
+4.  access the app using: `http://127.0.0.1:8080/`
+
+
+5.  if you get an error about database pooling: `go to rocket.toml and change the pool_size to 1 - 5`, retry `cargo run`
     
     That's all!
 
