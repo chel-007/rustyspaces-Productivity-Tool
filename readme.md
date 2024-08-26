@@ -18,12 +18,19 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
 
 <hr>
 
+### Access App here: https://rustyspaces.up.railway.app/
+
+> NB: the extras directory contains extra code n resources - `a lib directory` which contains my flutter frontend components, these has been built and compiled into dart and javascript but these are the original files. AND `a database directory` which contains csv files of the table and rows formatting from supabase.
+
+
+<hr>
+
 ### **Technical Details:**
 
 -   the frontend, built with Flutter, integrates seamlessly with Rust and is copied to the `/static` folder after each build using a custom script. check it out here
 -   Supabase Postgres is integrated without the need for a `.env` file when running locally - it uses the Database URL specified in `Rocket.toml` for connections.
 
-> NB: `.env` was required while i built the table migrations but isn't required for interacting with data
+> NB: `.env` was required while i built the table migrations but isn't required for interacting with database
 
 -   rust's **Rocket, Diesel, and Tokio libraries** are utilized to create the backend web server, manage the database connections, and handle asynchronous streaming.
 -   the music is streamed in **byte chunks**, and on the frontend, HTML Blob is used for processing since the Flutter audioplayers package couldn't handle this for the web.
