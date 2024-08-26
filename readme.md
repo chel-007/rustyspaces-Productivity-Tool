@@ -59,6 +59,9 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
 
 1.  clone the repo using the following command:
     `git clone https://github.com/chel-007/rustyspaces-Productivity-Tool.git` 
+
+2.  navigate to the project directory:
+    `cd rustyspaces-Productivity-Tool`
     
 3.  start the application by running:
     `cargo run` 
@@ -66,8 +69,7 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
 4.  access the app using: `http://127.0.0.1:8080/`
 
 
-5.  if you get an error about database pooling: `go to rocket.toml and change the pool_size to 1 - 5`, retry `cargo run`
-    
-    That's all!
+5.  If you encounter a database pooling error, open `rocket.toml and adjust the pool_size to a value between 1 - 5`, then retry:    `cargo run`
+ 
 
-> **NB:** the app was designed with the goal of being fully responsive on mobile devices, and thanks to Flutter, it almost is. **However,** please be aware that your cookies won't transfer. xD
+> **NB:** the app was designed with the goal of being fully responsive on mobile devices, and thanks to Flutter, it almost is. **However,** please be aware that your cookies won't transfer.
