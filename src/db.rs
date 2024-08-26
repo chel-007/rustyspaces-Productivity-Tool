@@ -2,7 +2,6 @@ use diesel::prelude::*;
 use rocket_sync_db_pools::database;
 use uuid::Uuid;
 use chrono::NaiveDateTime;
-use chrono::Duration;
 use crate::models::StickyLine;
 use crate::models::{StickyNote, TimeTrackingSession};
 

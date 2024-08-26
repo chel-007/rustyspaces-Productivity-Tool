@@ -1,6 +1,5 @@
 use diesel::{Queryable, Insertable, Selectable};
 use serde::{Deserialize, Serialize};
-use chrono::{NaiveDateTime};
 use uuid::Uuid;
 use super::schema::sticky_notes;
 use super::schema::time_tracking_sessions;

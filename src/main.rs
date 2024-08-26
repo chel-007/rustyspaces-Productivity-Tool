@@ -18,17 +18,14 @@ use rocket::fs::NamedFile;
 use std::path::{Path, PathBuf};
 use rocket::response::status;
 use rocket::http::Status;
-use rocket::response::content;
 use rocket::http::ContentType;
-use rocket::tokio::fs::{self, File};
+use rocket::tokio::fs::{File};
 use rocket::tokio::io::BufReader;
-use rocket::http::hyper::body::Bytes;
 use rocket::response::stream::ByteStream;
 use tokio_util::io::ReaderStream;
-use rand::seq::SliceRandom; // For selecting a random file
-use tokio_stream::wrappers::ReadDirStream; // To wrap `ReadDir` as a stream
-use tokio_stream::StreamExt; // To use `collect` on the stream
-use futures::Stream;
+use rand::seq::SliceRandom;
+use tokio_stream::wrappers::ReadDirStream;
+use tokio_stream::StreamExt;
 use rocket::tokio::sync::RwLock;
 use std::sync::Arc;
 use rocket::State;
@@ -58,21 +55,21 @@ fn rocket() -> _ {
 #[derive(Default)]
 pub struct Spaces { // Make the struct public
     pub spaces: Mutex<HashMap<String, Vec<String>>>,
-    pub active_connections: Mutex<HashMap<String, String>>, // Tracks user connections
+    pub active_connections: Mutex<HashMap<String, String>>,
 }
 
 impl Spaces {
-    pub fn add_connection(&self, user_id: String, space_name: String) { // Make the method public
+    pub fn add_connection(&self, user_id: String, space_name: String) {
         let mut connections = self.active_connections.lock().unwrap();
         connections.insert(user_id, space_name);
     }
 
-    pub fn remove_connection(&self, user_id: &String) { // Make the method public
+    pub fn remove_connection(&self, user_id: &String) {
         let mut connections = self.active_connections.lock().unwrap();
         connections.remove(user_id);
     }
 
-    pub fn get_other_active_spaces(&self, current_user_id: &String) -> Vec<String> { // Make the method public
+    pub fn get_other_active_spaces(&self, current_user_id: &String) -> Vec<String> {
         let connections = self.active_connections.lock().unwrap();
         connections.iter()
         .filter(|(user_id, _)| *user_id != current_user_id)// Exclude the current user's spaces
@@ -118,9 +115,8 @@ async fn get_spaces(jar: &CookieJar<'_>, conn: db::DbConn) -> Json<HashMap<Strin
             result.insert(user_id, user_spaces);
         }
         Err(e) => {
-            // Handle the error, e.g., logging or setting an error message
+            // Handle the error
             println!("Error fetching user spaces: {:?}", e);
-            // Optionally, you can insert an empty vector or handle the error differently
             result.insert(user_id, Vec::new());
         }
     }
@@ -154,7 +150,7 @@ async fn view_space(space_name: String, jar: &CookieJar<'_>, conn: db::DbConn, s
     let user_spaces = match user_spaces_result {
         Ok(s) => s,
         Err(e) => {
-            // Handle the error, e.g., logging or defaulting to an empty vector
+            // Handle the error
             println!("Error fetching user spaces: {:?}", e);
             Vec::new()
         }

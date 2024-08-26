@@ -4,6 +4,7 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
 **Spaces**: A rusty jampacked space you can create, authenticated by cookies. You can have multiple spaces on the server, each tailored to your needs.
 
 **Sticky Notes**: Within your space, you can create unlimited sticky notes to document weekly goals. Each note includes a checkbox feature, a header, and more. Notes are stored on **Supabase PostgreSQL** database after being serialized and deserialized using Rust.
+
 ![sticky notes](images/sticky-notes.png)
 
 
@@ -17,7 +18,7 @@ Welcome to **RustySpaces**, your ultimate productivity tool for aligning goals a
 
 <hr>
 
-**Technical Details:**
+### **Technical Details:**
 
 -   the frontend, built with Flutter, integrates seamlessly with Rust and is copied to the `/static` folder after each build using a custom script. check it out here
 -   Supabase Postgres is integrated without the need for a `.env` file when running locally - it uses the Database URL specified in `Rocket.toml` for connections.
